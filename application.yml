@@ -1,0 +1,95 @@
+info:
+  id: ${spring.application.name}
+
+management:
+  port: 9000
+  context-path: /admin
+  info.git.mode: full
+  
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+  health:
+    sensitive: false
+
+ribbon:
+  client:
+    name: ${spring.application.name}
+  eureka:
+    enabled: true
+
+###
+# Logging Configuration
+###
+logging:
+  level:
+    root: INFO
+    org:
+      springframework: INFO
+      hibernate: ERROR
+    com.carnival: INFO
+
+spring:
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*
+  profiles:
+    active: default
+
+---
+
+spring:
+  profiles: docker
+  jpa:
+   generate-ddl: true
+  sleuth:
+   sampler:
+     percentage: 1.0
+   log:
+     json:
+       enabled: true
+  zipkin:
+    enabled: true
+    host: zipkin
+    base-url: http://zipkin:9411
+
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    nonSecurePortEnabled: true
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://discovery:8761/eureka/
+    fetchRegistry: true
+
+---
+
+spring:
+  profiles: default
+  jpa:
+    generate-ddl: true
+  sleuth:
+    sampler:
+      percentage: 1.0
+    log:
+      json:
+        enabled: true
+  zipkin:
+    host: localhost
+    base-url: http://localhost:9411
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    fetchRegistry: true
+
+logging.file: 
